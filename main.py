@@ -588,8 +588,8 @@ st.markdown("""
   <div style="flex:0 0 250px;min-height:220px;text-align:left;background:rgba(255,255,255,0.03);padding:1rem 1.2rem;border-radius:16px;color:#D3D3D3;font-size:13px;font-weight:500;border:1px solid rgba(255,255,255,0.08);box-shadow:0 4px 12px rgba(0,0,0,0.1);">
       <b>Developed by:</b><br>
       <span style="font-size:.9rem;font-weight:500;color:#FFD700;">Md. Tushar Ali</span> (PhD Student)<br>
-      Department of Civil & Environmental Engineering, NJ, United States.<br>
-      New Jersey Institute of Technology
+      Department of Civil & Environmental Engineering.<br>
+      New Jersey Institute of Technology, NJ, United States
   </div>
   <div style="flex:1;text-align:center;color:#B0E0E6;font-size:16px;font-style:italic;line-height:1.5;margin-top:.5rem;">
       This Web app has developed Based on Article of <b><i>Building and Environment</i></b>:<br>
@@ -607,6 +607,7 @@ st.markdown("""
 <!-- Auto-refresh hint for deployment -->
 <meta http-equiv="refresh" content="3600">
 """, unsafe_allow_html=True)
+
 
 
 
