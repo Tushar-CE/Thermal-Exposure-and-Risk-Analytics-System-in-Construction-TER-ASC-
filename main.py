@@ -411,17 +411,32 @@ with tab2:
         pmv_pattern = bh_df['PMV'].values if 'PMV' in bh_df.columns else pet_pattern * 0.08
         
         # Ensure monotonic decrease
-        for i in range(1, len(pet_pattern)):
-            if pet_pattern[i] > pet_pattern[i-1]:
-                pet_pattern[i] = pet_pattern[i-1] - 0.1
-            if pmv_pattern[i] > pmv_pattern[i-1]:
-                pmv_pattern[i] = pmv_pattern[i-1] - 0.01
-        
-        pet_relative = pet_pattern / pet_pattern[0]
-        pmv_relative = pmv_pattern / pmv_pattern[0]
-        
-        pet_profile = ground_pet * pet_relative
-        pmv_profile = ground_pmv * pmv_relative
+       # Ensure monotonic decrease for PET pattern
+for i in range(1, len(pet_pattern)):
+    if pet_pattern[i] > pet_pattern[i-1]:
+        # Ensure decreasing trend by setting slightly lower than previous value
+        pet_pattern[i] = max(pet_pattern[i-1] - 0.1, 0)  # Prevent negative values if needed
+
+# Ensure monotonic decrease for PMV pattern
+for i in range(1, len(pmv_pattern)):
+    if pmv_pattern[i] > pmv_pattern[i-1]:
+        # Ensure decreasing trend by setting slightly lower than previous value
+        pmv_pattern[i] = max(pmv_pattern[i-1] - 0.01, -3)  # Respect PMV typical range (-3 to +3)
+
+# Calculate relative values (first value becomes reference point 1.0)
+if pet_pattern[0] != 0:
+    pet_relative = pet_pattern / pet_pattern[0]
+else:
+    pet_relative = pet_pattern  # Avoid division by zero
+
+if pmv_pattern[0] != 0:
+    pmv_relative = pmv_pattern / pmv_pattern[0]
+else:
+    pmv_relative = pmv_pattern  # Avoid division by zero
+
+# Apply scaling to ground values
+pet_profile = ground_pet * pet_relative
+pmv_profile = ground_pmv * pmv_relative
         
         # OPTIMIZATION 9: Fewer points for smoother rendering
         heights_smooth = np.linspace(0, 100, 100)  # Reduced from 200
