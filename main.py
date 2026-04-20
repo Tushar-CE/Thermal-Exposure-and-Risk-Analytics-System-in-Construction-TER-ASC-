@@ -407,55 +407,52 @@ with tab2:
     
     if 'Height(m)' in bh_df.columns and 'PET(0C)' in bh_df.columns and len(bh_df) > 0:
         heights_original = bh_df['Height(m)'].values
-        pet_pattern = bh_df['PET(0C)'].values
-        pmv_pattern = bh_df['PMV'].values if 'PMV' in bh_df.columns else pet_pattern * 0.08
+        pet_pattern = bh_df['PET(0C)'].values.copy()
+        pmv_pattern = bh_df['PMV'].values.copy() if 'PMV' in bh_df.columns else pet_pattern * 0.08
         
-        # Ensure monotonic decrease
-       # Ensure monotonic decrease for PET pattern
-for i in range(1, len(pet_pattern)):
-    if pet_pattern[i] > pet_pattern[i-1]:
-        # Ensure decreasing trend by setting slightly lower than previous value
-        pet_pattern[i] = max(pet_pattern[i-1] - 0.1, 0)  # Prevent negative values if needed
-
-# Ensure monotonic decrease for PMV pattern
-for i in range(1, len(pmv_pattern)):
-    if pmv_pattern[i] > pmv_pattern[i-1]:
-        # Ensure decreasing trend by setting slightly lower than previous value
-        pmv_pattern[i] = max(pmv_pattern[i-1] - 0.01, -3)  # Respect PMV typical range (-3 to +3)
-
-# Calculate relative values (first value becomes reference point 1.0)
-if pet_pattern[0] != 0:
-    pet_relative = pet_pattern / pet_pattern[0]
-else:
-    pet_relative = pet_pattern  # Avoid division by zero
-
-if pmv_pattern[0] != 0:
-    pmv_relative = pmv_pattern / pmv_pattern[0]
-else:
-    pmv_relative = pmv_pattern  # Avoid division by zero
-
-# Apply scaling to ground values
-pet_profile = ground_pet * pet_relative
-pmv_profile = ground_pmv * pmv_relative
+        # Ensure monotonic decrease for PET pattern
+        for i in range(1, len(pet_pattern)):
+            if pet_pattern[i] > pet_pattern[i-1]:
+                pet_pattern[i] = max(pet_pattern[i-1] - 0.1, 0)
+        
+        # Ensure monotonic decrease for PMV pattern
+        for i in range(1, len(pmv_pattern)):
+            if pmv_pattern[i] > pmv_pattern[i-1]:
+                pmv_pattern[i] = max(pmv_pattern[i-1] - 0.01, -3)
+        
+        # Calculate relative values (first value becomes reference point 1.0)
+        if pet_pattern[0] != 0:
+            pet_relative = pet_pattern / pet_pattern[0]
+        else:
+            pet_relative = pet_pattern
+        
+        if pmv_pattern[0] != 0:
+            pmv_relative = pmv_pattern / pmv_pattern[0]
+        else:
+            pmv_relative = pmv_pattern
+        
+        # Apply scaling to ground values
+        pet_profile = ground_pet * pet_relative
+        pmv_profile = ground_pmv * pmv_relative
         
         # OPTIMIZATION 9: Fewer points for smoother rendering
-heights_smooth = np.linspace(0, 100, 100)  # Reduced from 200
-pet_smooth = np.interp(heights_smooth, heights_original, pet_profile)
-pmv_smooth = np.interp(heights_smooth, heights_original, pmv_profile)
-
-fig_vertical = make_subplots(specs=[[{"secondary_y": True}]])
-
-fig_vertical.add_trace(
-    go.Scatter(x=heights_smooth, y=pet_smooth, name="PET", 
-              line=dict(color='#FF6B6B', width=3), mode='lines'),
-    secondary_y=False
-)
-
-fig_vertical.add_trace(
-    go.Scatter(x=heights_smooth, y=pmv_smooth, name="PMV", 
-              line=dict(color='#4ECDC4', width=3), mode='lines'),
-    secondary_y=True
-)
+        heights_smooth = np.linspace(0, 100, 100)
+        pet_smooth = np.interp(heights_smooth, heights_original, pet_profile)
+        pmv_smooth = np.interp(heights_smooth, heights_original, pmv_profile)
+        
+        fig_vertical = make_subplots(specs=[[{"secondary_y": True}]])
+        
+        fig_vertical.add_trace(
+            go.Scatter(x=heights_smooth, y=pet_smooth, name="PET", 
+                      line=dict(color='#FF6B6B', width=3), mode='lines'),
+            secondary_y=False
+        )
+        
+        fig_vertical.add_trace(
+            go.Scatter(x=heights_smooth, y=pmv_smooth, name="PMV", 
+                      line=dict(color='#4ECDC4', width=3), mode='lines'),
+            secondary_y=True
+        )
         
         # Threshold zones
         fig_vertical.add_hrect(y0=41, y1=50, line_width=0, fillcolor="red", opacity=0.1, secondary_y=False,
@@ -502,6 +499,8 @@ fig_vertical.add_trace(
         fig_vertical.update_yaxes(title_text="PMV", secondary_y=True, gridcolor='rgba(255,255,255,0.1)')
         
         st.plotly_chart(fig_vertical, use_container_width=True)
+    else:
+        st.warning("No vertical profile data available")
 
 with tab3:
     st.markdown('<div class="section-title">📊 Loss by Work Type</div>', unsafe_allow_html=True)
@@ -622,8 +621,3 @@ st.markdown("""
 <!-- Auto-refresh hint for deployment -->
 <meta http-equiv="refresh" content="3600">
 """, unsafe_allow_html=True)
-
-
-
-
-
