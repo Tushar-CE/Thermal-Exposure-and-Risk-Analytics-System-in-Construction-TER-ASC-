@@ -439,23 +439,23 @@ pet_profile = ground_pet * pet_relative
 pmv_profile = ground_pmv * pmv_relative
         
         # OPTIMIZATION 9: Fewer points for smoother rendering
-        heights_smooth = np.linspace(0, 100, 100)  # Reduced from 200
-        pet_smooth = np.interp(heights_smooth, heights_original, pet_profile)
-        pmv_smooth = np.interp(heights_smooth, heights_original, pmv_profile)
-        
-        fig_vertical = make_subplots(specs=[[{"secondary_y": True}]])
-        
-        fig_vertical.add_trace(
-            go.Scatter(x=heights_smooth, y=pet_smooth, name="PET", 
-                      line=dict(color='#FF6B6B', width=3), mode='lines'),
-            secondary_y=False
-        )
-        
-        fig_vertical.add_trace(
-            go.Scatter(x=heights_smooth, y=pmv_smooth, name="PMV", 
-                      line=dict(color='#4ECDC4', width=3), mode='lines'),
-            secondary_y=True
-        )
+heights_smooth = np.linspace(0, 100, 100)  # Reduced from 200
+pet_smooth = np.interp(heights_smooth, heights_original, pet_profile)
+pmv_smooth = np.interp(heights_smooth, heights_original, pmv_profile)
+
+fig_vertical = make_subplots(specs=[[{"secondary_y": True}]])
+
+fig_vertical.add_trace(
+    go.Scatter(x=heights_smooth, y=pet_smooth, name="PET", 
+              line=dict(color='#FF6B6B', width=3), mode='lines'),
+    secondary_y=False
+)
+
+fig_vertical.add_trace(
+    go.Scatter(x=heights_smooth, y=pmv_smooth, name="PMV", 
+              line=dict(color='#4ECDC4', width=3), mode='lines'),
+    secondary_y=True
+)
         
         # Threshold zones
         fig_vertical.add_hrect(y0=41, y1=50, line_width=0, fillcolor="red", opacity=0.1, secondary_y=False,
